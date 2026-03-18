@@ -44,6 +44,27 @@ const MOCK_OPENING_HOURS: Record<string, string> = {
   sunday: 'Closed',
 };
 
+// ─── Normalisation des liens CTA ─────────────────────────────────────────────
+
+const VALID_ROUTES = ['/', '/auth', '/bookings', '/admin'];
+
+const normalizeLink = (link: unknown): string => {
+  if (typeof link !== 'string' || !link) return '/auth';
+  if (VALID_ROUTES.includes(link)) return link;
+  console.warn(`[PageRenderer] Lien CTA invalide "${link}", remplacé par "/auth"`);
+  return '/auth';
+};
+
+const normalizeBlockProps = (props: Record<string, any>): Record<string, any> => {
+  const p = { ...props };
+  if ('ctaLink' in p) p.ctaLink = normalizeLink(p.ctaLink);
+  if (p.ctaPrimary?.link !== undefined)
+    p.ctaPrimary = { ...p.ctaPrimary, link: normalizeLink(p.ctaPrimary.link) };
+  if (p.ctaSecondary?.link !== undefined)
+    p.ctaSecondary = { ...p.ctaSecondary, link: normalizeLink(p.ctaSecondary.link) };
+  return p;
+};
+
 // Props runtime injectées par type de bloc (auth = no-op, booking = données réelles ou mock)
 const getRuntimeProps = (
   type: string,
@@ -154,7 +175,7 @@ export const PageRenderer = ({ blocks, config = {} }: PageRendererProps) => {
         return (
           <Component
             key={i}
-            {...block.props}
+            {...normalizeBlockProps(block.props)}
             {...configOverrides}
             {...runtimeProps}
           />

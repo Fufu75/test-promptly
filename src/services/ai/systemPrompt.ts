@@ -48,6 +48,22 @@ const AMBIANCE_GUIDANCE = `## Sélection des variants selon l'ambiance
 Chaque variant possède un champ "mood" qui décrit son atmosphère visuelle.
 Utilise les mots d'ambiance fournis par l'utilisateur comme guide pour orienter ton choix de variants — l'objectif est de créer une cohérence entre l'ambiance souhaitée et le rendu global du site.`;
 
+// ─── Couche 2c : Routes valides pour les liens CTA ───────────────────────────
+
+const CTA_LINK_RULES = `## Routes valides pour les liens CTA — RÈGLE STRICTE
+
+Le site déployé ne possède QUE ces routes React Router :
+- "/" → page d'accueil
+- "/auth" → page connexion / inscription (utilise pour "Réserver", "Prendre rendez-vous", "S'inscrire")
+- "/bookings" → page réservations (utilise pour "Mes réservations", "Mon espace")
+
+INTERDIT :
+- "/services", "/booking", "/contact", "/about" ou toute autre route → elles n'existent PAS
+- Les ancres "#section" → non supportées par le routeur
+- Les URLs absolues "https://..." → incompatibles avec la navigation interne
+
+Par défaut, tout bouton d'appel à l'action principal doit pointer vers "/auth".`;
+
 // ─── Couche 3 : Règles de structure des pages ─────────────────────────────────
 
 const PAGE_STRUCTURE_RULES = `## Règles de structure des pages
@@ -129,6 +145,7 @@ export const buildChatSystemPrompt = (
     PERSONA_AND_RULES,
     businessSection,
     LIBRARY_AND_CONTRACT,
+    CTA_LINK_RULES,
     PAGE_STRUCTURE_RULES,
     currentStateSection,
     OUTPUT_FORMAT_CHAT,
@@ -141,6 +158,7 @@ export const buildInitialSystemPrompt = (): string => {
   return [
     PERSONA_AND_RULES,
     LIBRARY_AND_CONTRACT,
+    CTA_LINK_RULES,
     AMBIANCE_GUIDANCE,
     PAGE_STRUCTURE_RULES,
     OUTPUT_FORMAT_INITIAL,
