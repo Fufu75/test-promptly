@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfig } from '@/hooks/useConfig';
+import { useSlots } from '@/hooks/useSlots';
 import { supabase } from '@/integrations/supabase/client';
 import { TimePickerWeekGrid } from '@/components/blocks/booking/TimePicker/WeekGrid';
 import { Button } from '@/components/ui/button';
@@ -13,16 +14,11 @@ import { parseLocalDateTime, formatLocalDateTime } from '@/utils/dateHelpers';
 const ClientBookings = () => {
   const { signOut, profile } = useAuth();
   const config = useConfig();
-  const [allConfirmedBookings, setAllConfirmedBookings] = useState<any[]>([]);
+  const { bookings: allConfirmedBookings, isLoading: slotsLoading, refetch: refetchSlots } = useSlots();
   const [myBookings, setMyBookings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Sélection de service
   const [selectedService, setSelectedService] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchAllConfirmedBookings();
-  }, []);
 
   // Fetch bookings only when profile is loaded
   useEffect(() => {
@@ -62,24 +58,6 @@ const ClientBookings = () => {
     if (updateError) {
       console.error('Error updating past bookings:', updateError);
     }
-  };
-
-  // Fetch tous les bookings confirmés futurs du client (pour détecter les conflits)
-  const fetchAllConfirmedBookings = async () => {
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('status', 'confirmed')
-      .eq('client_id', import.meta.env.VITE_CLIENT_ID)
-      .gte('end_time', new Date().toISOString())
-      .order('start_time', { ascending: true });
-
-    if (error) {
-      toast.error('Impossible de charger les disponibilités');
-    } else {
-      setAllConfirmedBookings(data || []);
-    }
-    setLoading(false);
   };
 
   const fetchMyBookings = async () => {
@@ -159,7 +137,7 @@ const ClientBookings = () => {
       }
     } else {
       toast.success(`${service.name} réservé avec succès pour ${startTime.toLocaleTimeString('fr-FR')} !`);
-      fetchAllConfirmedBookings();
+      refetchSlots();
       fetchMyBookings();
     }
   };
@@ -174,12 +152,12 @@ const ClientBookings = () => {
       toast.error('Impossible d\'annuler la réservation');
     } else {
       toast.success('Réservation annulée');
-      fetchAllConfirmedBookings();
+      refetchSlots();
       fetchMyBookings();
     }
   };
 
-  if (loading) {
+  if (slotsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
