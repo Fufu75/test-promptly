@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { LogOut, Calendar, CheckCircle2, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { parseLocalDateTime, formatLocalDateTime } from '@/utils/dateHelpers';
 
 const ClientBookings = () => {
@@ -242,15 +243,19 @@ const ClientBookings = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-            </div>
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-75 transition-opacity">
+            {config.logoUrl ? (
+              <img src={config.logoUrl} alt={config.brandName} className="w-8 h-8 sm:w-10 sm:h-10 object-contain flex-shrink-0" />
+            ) : (
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              </div>
+            )}
             <div className="min-w-0">
               <h1 className="text-base sm:text-lg md:text-xl font-bold truncate">{config.brandName}</h1>
               <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Mes réservations</p>
             </div>
-          </div>
+          </Link>
           <Button variant="outline" size="sm" className="flex-shrink-0" onClick={signOut}>
             <LogOut className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Se déconnecter</span>
