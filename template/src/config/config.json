@@ -1,0 +1,95 @@
+{
+  "brandName": "Barber",
+  "businessSector": "General Services",
+  "logoUrl": "",
+  "description": "Plateforme de réservation en ligne simple et efficace",
+  "contact": {
+    "phone": "",
+    "email": "contact@bookinghub.com",
+    "address": ""
+  },
+  "theme": {
+    "primaryColor": "#0EA5E9",
+    "secondaryColor": "#06B6D4",
+    "accentColor": "#F59E0B",
+    "darkModeEnabled": true
+  },
+  "openingHours": {
+    "monday": "9:00-17:00",
+    "tuesday": "9:00-17:00",
+    "wednesday": "9:00-17:00",
+    "thursday": "9:00-17:00",
+    "friday": "9:00-17:00",
+    "saturday": "Closed",
+    "sunday": "Closed"
+  },
+  "bookingSettings": {
+    "slotDuration": 60,
+    "timeSlotGranularity": 10,
+    "maxAdvanceBookingDays": 30,
+    "minAdvanceBookingHours": 2,
+    "allowCancellation": true,
+    "cancellationDeadlineHours": 24,
+    "maxBookingsPerUser": 5,
+    "requireNotes": false,
+    "autoConfirm": true
+  },
+  "features": {
+    "showStats": true,
+    "allowMultipleSlots": false,
+    "enableNotifications": false,
+    "showRecentBookings": true,
+    "maxRecentBookings": 5
+  },
+  "texts": {
+    "welcomeMessage": "Bienvenue sur notre plateforme de réservation",
+    "bookingSuccessMessage": "Votre réservation a été confirmée avec succès !",
+    "bookingInstructions": "Veuillez arriver 5 minutes avant votre rendez-vous",
+    "cancellationPolicy": "Vous pouvez annuler votre réservation jusqu'à 24h avant le rendez-vous",
+    "homepage": {
+      "heroTitle": "Réservation Simple et Efficace",
+      "heroDescription": "Gérez vos rendez-vous facilement avec notre système de réservation intuitif. Réservez, modifiez ou annulez en quelques clics.",
+      "ctaBookNow": "Réserver maintenant",
+      "ctaSignIn": "Se connecter",
+      "ctaGetStarted": "Commencer",
+      "feature1Title": "Disponibilité en temps réel",
+      "feature1Description": "Consultez les créneaux disponibles instantanément et réservez votre horaire préféré",
+      "feature2Title": "Gestion simplifiée",
+      "feature2Description": "Visualisez et gérez toutes vos réservations dans un tableau de bord pratique",
+      "feature3Title": "Sécurisé et fiable",
+      "feature3Description": "Vos données sont protégées avec une sécurité de niveau professionnel"
+    }
+  },
+  "seo": {
+    "title": "Barber - Réservation en ligne",
+    "description": "Réservez votre créneau en ligne facilement",
+    "keywords": "réservation, booking, rendez-vous, en ligne"
+  },
+  "social": {
+    "facebook": "",
+    "instagram": "",
+    "twitter": "",
+    "linkedin": ""
+  },
+  "services": [
+    {
+      "id": "coupe",
+      "name": "Coupe",
+      "description": "Coupe de cheveux",
+      "duration": 20,
+      "price": 15,
+      "color": "#0EA5E9",
+      "enabled": true
+    },
+    {
+      "id": "coupe-barbe",
+      "name": "Coupe + Barbe",
+      "description": "Coupe de cheveux + taille de barbe",
+      "duration": 30,
+      "price": 20,
+      "color": "#10B981",
+      "enabled": true
+    }
+
+  ]
+}

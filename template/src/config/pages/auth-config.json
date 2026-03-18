@@ -1,0 +1,9 @@
+{
+  "page": "auth",
+  "variant": "centered-card",
+  "props": {
+    "brandName": "Studio Zen",
+    "accentColor": "#8B5CF6",
+    "tagline": "Réservez votre moment de détente"
+  }
+}

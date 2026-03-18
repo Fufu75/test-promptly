@@ -1,0 +1,36 @@
+{
+  "page": "booking",
+  "description": "Page de réservation client — configuration par défaut",
+  "pageBlocks": [
+    {
+      "type": "ServiceSelector",
+      "variant": "cards-grid",
+      "props": {
+        "accentColor": "#8B5CF6",
+        "sectionTitle": "Choisissez votre service",
+        "sectionSubtitle": "Sélectionnez le service que vous souhaitez réserver"
+      }
+    },
+    {
+      "type": "TimePicker",
+      "variant": "week-grid",
+      "props": {
+        "accentColor": "#8B5CF6",
+        "sectionTitle": "Choisissez un créneau",
+        "sectionSubtitle": "Sélectionnez la date et l'heure de votre rendez-vous",
+        "maxAdvanceBookingDays": 60
+      }
+    },
+    {
+      "type": "BookingList",
+      "variant": "cards-stack",
+      "props": {
+        "accentColor": "#8B5CF6",
+        "sectionTitle": "Mes réservations",
+        "sectionSubtitle": "Consultez et gérez vos rendez-vous",
+        "emptyMessage": "Aucune réservation pour le moment",
+        "allowCancellation": true
+      }
+    }
+  ]
+}

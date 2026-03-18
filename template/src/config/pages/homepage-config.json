@@ -1,0 +1,145 @@
+{
+  "pageBlocks": [
+    {
+      "_comment": "=== LANDING PAGE COMPLETE - Studio Zen ===",
+      "type": "Header",
+      "variant": "centered-icon",
+      "props": {
+        "brandName": "Studio Zen",
+        "businessSector": "Bien-être & Relaxation",
+        "accentColor": "#8B5CF6",
+        "ctaText": "Réserver"
+      }
+    },
+    {
+      "type": "Hero",
+      "variant": "centered-badge",
+      "props": {
+        "brandName": "Studio Zen",
+        "title": "Offrez-vous un moment de sérénité",
+        "description": "Prenez rendez-vous pour une séance sur-mesure. Nos praticiens vous accompagnent vers un bien-être durable.",
+        "accentColor": "#8B5CF6",
+        "ctaPrimary": {
+          "text": "Prendre rendez-vous",
+          "link": "/auth"
+        },
+        "ctaSecondary": {
+          "text": "Découvrir nos soins",
+          "link": "/services"
+        }
+      }
+    },
+    {
+      "type": "Features",
+      "variant": "cards-grid",
+      "props": {
+        "accentColor": "#8B5CF6",
+        "sectionTitle": "Pourquoi nous choisir",
+        "sectionSubtitle": "Des avantages qui font la différence",
+        "features": [
+          {
+            "icon": "clock",
+            "title": "Flexibilité totale",
+            "description": "Réservez en ligne 24h/24, modifiez ou annulez facilement"
+          },
+          {
+            "icon": "shield",
+            "title": "Praticiens certifiés",
+            "description": "Une équipe qualifiée et à votre écoute"
+          },
+          {
+            "icon": "check",
+            "title": "Satisfaction garantie",
+            "description": "97% de nos clients nous recommandent"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Services",
+      "variant": "cards-hover",
+      "props": {
+        "accentColor": "#8B5CF6",
+        "sectionTitle": "Nos soins",
+        "sectionSubtitle": "Choisissez votre moment de détente",
+        "services": [
+          {
+            "id": "massage-relaxant",
+            "name": "Massage Relaxant",
+            "description": "Un massage doux pour évacuer le stress quotidien",
+            "duration": 60,
+            "price": 70,
+            "color": "#8B5CF6"
+          },
+          {
+            "id": "massage-profond",
+            "name": "Massage Profond",
+            "description": "Travail en profondeur sur les tensions musculaires",
+            "duration": 90,
+            "price": 95,
+            "color": "#A78BFA"
+          },
+          {
+            "id": "soin-visage",
+            "name": "Soin Visage",
+            "description": "Nettoyage et hydratation pour une peau éclatante",
+            "duration": 45,
+            "price": 55,
+            "color": "#C4B5FD"
+          }
+        ]
+      }
+    },
+    {
+      "type": "OpeningHours",
+      "variant": "grid-cards",
+      "props": {
+        "accentColor": "#8B5CF6",
+        "sectionTitle": "Nos horaires",
+        "sectionSubtitle": "Nous sommes là pour vous",
+        "openingHours": {
+          "monday": "9:00 - 19:00",
+          "tuesday": "9:00 - 19:00",
+          "wednesday": "9:00 - 19:00",
+          "thursday": "9:00 - 21:00",
+          "friday": "9:00 - 19:00",
+          "saturday": "10:00 - 18:00",
+          "sunday": "Closed"
+        }
+      }
+    },
+    {
+      "type": "Contact",
+      "variant": "cards-icons",
+      "props": {
+        "accentColor": "#8B5CF6",
+        "sectionTitle": "Nous contacter",
+        "sectionSubtitle": "Une question ? On vous répond",
+        "contact": {
+          "email": "contact@studio-zen.fr",
+          "phone": "01 23 45 67 89",
+          "address": "12 rue de la Paix, 75002 Paris"
+        }
+      }
+    },
+    {
+      "type": "FooterCTA",
+      "variant": "banner-gradient",
+      "props": {
+        "accentColor": "#8B5CF6",
+        "title": "Prêt à vous détendre ?",
+        "subtitle": "Réservez votre séance en quelques clics",
+        "ctaText": "Réserver maintenant",
+        "ctaLink": "/auth"
+      }
+    },
+    {
+      "type": "Footer",
+      "variant": "split-brand",
+      "props": {
+        "brandName": "Studio Zen",
+        "accentColor": "#8B5CF6"
+      }
+    }
+  ]
+}

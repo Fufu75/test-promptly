@@ -1,0 +1,48 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+
+  app-back:
+    build:
+      context: .
+      dockerfile: Dockerfile.back
+    image: bookwise-back-image
+    container_name: bookwise-back
+    restart: unless-stopped
+    environment:
+      - PORT=4000
+      - VITE_OLLAMA_URL=http://localhost:11434
+    ports:
+      - "4000:4000"
+    depends_on:
+      - ollama
+
+  app-front:
+    build:
+      context: .
+      dockerfile: Dockerfile.front
+    image: bookwise-front-image
+    container_name: bookwise-front
+    restart: unless-stopped
+    environment:
+      - VITE_OLLAMA_URL=http://localhost:11434
+      - VITE_SITEGEN_URL=http://localhost:4000
+      - VITE_SUPABASE_URL=https://zjldrgmguhauoscrkezm.supabase.co
+      - VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqbGRyZ21ndWhhdW9zY3JrZXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0Mjg2MDMsImV4cCI6MjA3ODAwNDYwM30.nl08VaEKjvFHpc6rFQD3RwlFpSi8tGkDHs4mcZteTlM
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app-back
+      - ollama
+
+volumes:
+  ollama_models:
+

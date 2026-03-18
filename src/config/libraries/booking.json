@@ -1,0 +1,78 @@
+{
+  "page": "booking",
+  "description": "Page de réservation client — sélection de service, choix de créneau et liste des réservations",
+  "runtimeProps": {
+    "_note": "Ces props sont injectées automatiquement par la page au runtime (données Supabase, callbacks). L'agent IA ne les configure PAS.",
+    "ServiceSelector": ["services[]", "selectedServiceId", "onServiceSelect"],
+    "TimePicker": ["bookings[]", "openingHours", "serviceDuration", "granularity", "onTimeSelect"],
+    "BookingList": ["bookings[]", "services[]", "onCancel"]
+  },
+  "componentsLibrary": {
+    "ServiceSelector": {
+      "description": "Sélection de service pour la réservation, affiche les services activés avec nom, durée et prix",
+      "configurableProps": ["accentColor", "sectionTitle?", "sectionSubtitle?"],
+      "variants": {
+        "cards-grid": {
+          "layout": "Grille 1-2 colonnes, cards avec nom/description/durée/prix, icône check sur sélection",
+          "visualTraits": ["cards avec bordure", "ring coloré sur sélection", "fond coloré léger", "icône CheckCircle"],
+          "spacing": "grid régulier, padding généreux",
+          "mood": ["visuel", "détaillé", "moderne", "engageant"]
+        },
+        "list-compact": {
+          "layout": "Liste verticale, chaque service sur une ligne avec icône, nom, durée et prix",
+          "visualTraits": ["icône dans carré arrondi", "barre accent sous titre", "fond coloré léger sur sélection"],
+          "spacing": "compact, vertical, efficace",
+          "mood": ["professionnel", "sobre", "lisible", "direct"]
+        },
+        "pills-horizontal": {
+          "layout": "Rangée de pills/badges horizontaux scrollables avec nom, durée et prix",
+          "visualTraits": ["pills arrondis", "fond plein coloré sur sélection", "scroll horizontal mobile"],
+          "spacing": "horizontal, compact, fluide",
+          "mood": ["dynamique", "rapide", "moderne", "minimaliste"]
+        }
+      }
+    },
+    "TimePicker": {
+      "description": "Sélection de créneau horaire basée sur les disponibilités et horaires d'ouverture",
+      "configurableProps": ["accentColor", "maxAdvanceBookingDays?", "sectionTitle?", "sectionSubtitle?"],
+      "variants": {
+        "week-grid": {
+          "layout": "Navigation semaine avec grille 7 jours, créneaux groupés par période (matin/après-midi/soir)",
+          "visualTraits": ["cards jour avec compteur", "boutons créneaux outline", "navigation semaine avec flèches", "picker calendrier"],
+          "spacing": "grille horizontale, créneaux en grid",
+          "mood": ["structuré", "clair", "fonctionnel", "complet"]
+        },
+        "calendar-sidebar": {
+          "layout": "2 colonnes : calendrier mensuel à gauche, liste de créneaux à droite",
+          "visualTraits": ["calendrier natif", "jours désactivés si complets", "liste scrollable de créneaux", "icône horloge"],
+          "spacing": "2 colonnes, sidebar pattern",
+          "mood": ["classique", "intuitif", "épuré", "familier"]
+        }
+      }
+    },
+    "BookingList": {
+      "description": "Liste des réservations de l'utilisateur avec statut et possibilité d'annulation",
+      "configurableProps": ["accentColor", "allowCancellation?", "sectionTitle?", "sectionSubtitle?", "emptyMessage?"],
+      "variants": {
+        "cards-stack": {
+          "layout": "Cards empilées verticalement, chaque card contient service, date, heure, statut et bouton annuler",
+          "visualTraits": ["cards avec bordure", "badge statut coloré", "bouton annuler outline", "responsive"],
+          "spacing": "vertical, aéré, standard",
+          "mood": ["clair", "détaillé", "accessible", "fonctionnel"]
+        },
+        "timeline-vertical": {
+          "layout": "Timeline avec points connectés par une ligne verticale, détails à droite de chaque noeud",
+          "visualTraits": ["ligne verticale colorée", "points avec bordure", "cards attachées", "visuel chronologique"],
+          "spacing": "vertical, décalé, narratif",
+          "mood": ["élégant", "narratif", "visuel", "chronologique"]
+        },
+        "table-compact": {
+          "layout": "Tableau avec colonnes Service, Date, Heure, Statut, Action. Vue cards sur mobile",
+          "visualTraits": ["table header discret", "hover sur lignes", "badges statut", "responsive mobile cards"],
+          "spacing": "dense, tabulaire, efficace",
+          "mood": ["professionnel", "dense", "efficace", "data-driven"]
+        }
+      }
+    }
+  }
+}

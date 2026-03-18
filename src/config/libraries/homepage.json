@@ -1,0 +1,200 @@
+{
+  "componentsLibrary": {
+    "Header": {
+      "description": "En-tête de navigation avec logo, nom de marque et CTA optionnel",
+      "props": ["brandName", "businessSector?", "accentColor", "ctaText?", "ctaLink?", "logoUrl?"],
+      "variants": {
+        "centered-icon": {
+          "layout": "Logo/icône à gauche dans un carré arrondi, texte à côté, CTA bouton à droite",
+          "visualTraits": ["icône dans carré coloré", "fond semi-transparent", "effet blur", "bouton plein"],
+          "spacing": "compact, équilibré",
+          "mood": ["dynamique", "accueillant", "chaleureux", "moderne", "friendly"]
+        },
+        "left-accent": {
+          "layout": "Barre verticale colorée à gauche, texte aligné, CTA texte avec flèche à droite",
+          "visualTraits": ["barre verticale fine", "fond neutre", "pas de bordure", "CTA discret"],
+          "spacing": "aéré, beaucoup d'espace blanc",
+          "mood": ["professionnel", "épuré", "calme", "confiance", "sérieux"]
+        },
+        "centered-bordered": {
+          "layout": "Texte centré, séparateur décoratif au milieu, CTA outline à droite, bordure colorée en bas",
+          "visualTraits": ["bordure inférieure colorée", "séparateur avec point central", "bouton outline"],
+          "spacing": "symétrique, centré",
+          "mood": ["élégant", "raffiné", "établi", "premium", "traditionnel"]
+        }
+      }
+    },
+    "Hero": {
+      "description": "Section principale avec message d'accroche, description et boutons d'action",
+      "props": ["brandName", "title", "description", "accentColor", "ctaPrimary{text,link}", "ctaSecondary?{text,link}", "backgroundImage?", "sideImage?"],
+      "variants": {
+        "centered-badge": {
+          "layout": "Contenu centré, badge de marque en haut, titre large, CTAs empilés verticalement",
+          "visualTraits": ["badge pill arrondi", "fond gradient coloré", "conteneur avec coins arrondis", "ombre légère"],
+          "spacing": "généreux, centré, hiérarchique",
+          "mood": ["dynamique", "accueillant", "énergique", "chaleureux", "engageant"],
+          "supportsImage": "backgroundImage (fond avec overlay)"
+        },
+        "split-image": {
+          "layout": "2 colonnes - texte aligné à gauche, espace/image à droite",
+          "visualTraits": ["barre horizontale sous le nom", "pas de fond coloré", "titres très grands", "CTAs côte à côte"],
+          "spacing": "asymétrique, beaucoup d'espace vide ou image à droite",
+          "mood": ["professionnel", "clean", "rassurant", "confiance", "sérieux"],
+          "supportsImage": "sideImage (colonne droite)"
+        },
+        "centered-decorated": {
+          "layout": "Centré avec lignes décoratives de part et d'autre du nom, séparateur horizontal avant CTAs",
+          "visualTraits": ["lignes horizontales décoratives", "typographie serif", "séparateur épais", "CTAs côte à côte"],
+          "spacing": "symétrique, équilibré, formel",
+          "mood": ["élégant", "raffiné", "intemporel", "premium", "sophistiqué"],
+          "supportsImage": "backgroundImage (fond avec overlay sombre)"
+        }
+      }
+    },
+    "Features": {
+      "description": "Section mettant en avant 3 avantages/fonctionnalités clés",
+      "props": ["features[]{icon,iconUrl?,title,description}", "accentColor", "sectionTitle?", "sectionSubtitle?"],
+      "availableIcons": ["clock", "check", "shield"],
+      "variants": {
+        "cards-grid": {
+          "layout": "Grid 3 colonnes, chaque feature dans une card individuelle",
+          "visualTraits": ["cards avec bordure légère", "icône dans carré arrondi coloré", "hover shadow"],
+          "spacing": "grid régulier, padding généreux",
+          "mood": ["dynamique", "interactif", "moderne", "engageant", "visuel"]
+        },
+        "list-vertical": {
+          "layout": "Liste verticale, icône à gauche de chaque item, texte aligné",
+          "visualTraits": ["petites icônes", "barre accent sous le titre de section", "pas de cards"],
+          "spacing": "liste aérée, alignement gauche, compact",
+          "mood": ["professionnel", "lisible", "efficace", "sobre", "direct"]
+        },
+        "circles-centered": {
+          "layout": "Grid 3 colonnes centré, icônes dans des cercles avec bordure",
+          "visualTraits": ["cercles avec bordure colorée", "ornement décoratif au-dessus du titre", "centré"],
+          "spacing": "symétrique, équilibré, formel",
+          "mood": ["élégant", "structuré", "traditionnel", "équilibré", "fiable"]
+        }
+      }
+    },
+    "Services": {
+      "description": "Section présentant les services/prestations avec prix et durée",
+      "props": ["services[]{id,name,description,duration,price,color,imageUrl?}", "accentColor", "sectionTitle?", "sectionSubtitle?"],
+      "variants": {
+        "cards-hover": {
+          "layout": "Grid 2-3 colonnes, cards avec effet hover",
+          "visualTraits": ["cards arrondies", "pastille de couleur", "hover translate-up", "prix mis en avant"],
+          "spacing": "grid régulier, padding généreux",
+          "mood": ["dynamique", "interactif", "moderne", "commercial", "engageant"]
+        },
+        "list-compact": {
+          "layout": "Liste verticale compacte, informations sur une ligne",
+          "visualTraits": ["barre verticale colorée par service", "layout horizontal", "prix à droite"],
+          "spacing": "compact, dense, efficace",
+          "mood": ["professionnel", "efficace", "sobre", "direct", "fonctionnel"]
+        },
+        "cards-bordered": {
+          "layout": "Grid 2 colonnes, cards avec bordure colorée, centré",
+          "visualTraits": ["bordure colorée", "ornement décoratif", "typographie serif", "prix très visible"],
+          "spacing": "symétrique, aéré, premium",
+          "mood": ["élégant", "premium", "raffiné", "luxueux", "haut-de-gamme"]
+        }
+      }
+    },
+    "OpeningHours": {
+      "description": "Section affichant les horaires d'ouverture de la semaine",
+      "props": ["openingHours{monday,tuesday,...}", "accentColor", "sectionTitle?", "sectionSubtitle?"],
+      "variants": {
+        "grid-cards": {
+          "layout": "Grid 2 colonnes dans une card, chaque jour sur fond coloré si ouvert",
+          "visualTraits": ["icône horloge au-dessus", "jours dans des mini-cards", "fond coloré pour jours ouverts"],
+          "spacing": "grid compact dans une grande card",
+          "mood": ["dynamique", "visuel", "clair", "moderne", "accessible"]
+        },
+        "list-simple": {
+          "layout": "Liste verticale simple, jour à gauche, horaires à droite",
+          "visualTraits": ["barre accent sous le titre", "séparateurs fins", "pas de fond coloré"],
+          "spacing": "liste aérée, minimaliste",
+          "mood": ["professionnel", "sobre", "lisible", "efficace", "clean"]
+        },
+        "list-dotted": {
+          "layout": "Liste avec ligne pointillée entre jour et horaire, dans une card bordée",
+          "visualTraits": ["bordure colorée", "ligne pointillée de liaison", "ornement décoratif", "typographie serif"],
+          "spacing": "formel, structuré, élégant",
+          "mood": ["élégant", "traditionnel", "raffiné", "classique", "établi"]
+        }
+      }
+    },
+    "Contact": {
+      "description": "Section affichant les informations de contact (email, téléphone, adresse)",
+      "props": ["contact{email?,phone?,address?}", "accentColor", "sectionTitle?", "sectionSubtitle?"],
+      "variants": {
+        "cards-icons": {
+          "layout": "Grid de cards, une par type de contact, icône à gauche",
+          "visualTraits": ["cards avec hover shadow", "icônes dans carrés colorés", "adresse en pleine largeur"],
+          "spacing": "grid 2 colonnes, aéré",
+          "mood": ["dynamique", "accessible", "moderne", "accueillant", "clair"]
+        },
+        "list-inline": {
+          "layout": "Liste verticale simple, icône + texte sur chaque ligne",
+          "visualTraits": ["icônes grises", "liens colorés", "barre accent sous titre", "très épuré"],
+          "spacing": "compact, minimaliste",
+          "mood": ["professionnel", "sobre", "efficace", "direct", "fonctionnel"]
+        },
+        "circles-row": {
+          "layout": "Rangée horizontale d'éléments centrés, icônes dans des cercles bordés",
+          "visualTraits": ["cercles avec bordure", "card avec bordure colorée", "ornement décoratif", "centré"],
+          "spacing": "symétrique, formel, centré",
+          "mood": ["élégant", "raffiné", "premium", "structuré", "traditionnel"]
+        }
+      }
+    },
+    "FooterCTA": {
+      "description": "Bandeau d'appel à l'action final avant le footer",
+      "props": ["title", "subtitle?", "ctaText", "ctaLink", "accentColor"],
+      "variants": {
+        "banner-gradient": {
+          "layout": "Bandeau centré avec fond gradient, titre + sous-titre + bouton",
+          "visualTraits": ["fond gradient coloré", "coins très arrondis", "bouton plein"],
+          "spacing": "généreux, centré, impactant",
+          "mood": ["dynamique", "engageant", "chaleureux", "call-to-action fort", "énergique"]
+        },
+        "inline-bordered": {
+          "layout": "Texte à gauche, bouton à droite, bordures haut et bas",
+          "visualTraits": ["bordures fines", "bouton outline avec flèche", "pas de fond coloré"],
+          "spacing": "horizontal, compact, sobre",
+          "mood": ["professionnel", "discret", "sobre", "efficace", "non-intrusif"]
+        },
+        "box-decorated": {
+          "layout": "Boîte centrée avec bordure colorée, ornements décoratifs, bouton centré",
+          "visualTraits": ["bordure épaisse colorée", "lignes décoratives", "centré"],
+          "spacing": "formel, symétrique, premium",
+          "mood": ["élégant", "raffiné", "premium", "invitation formelle", "sophistiqué"]
+        }
+      }
+    },
+    "Footer": {
+      "description": "Pied de page avec copyright et branding",
+      "props": ["brandName", "accentColor"],
+      "variants": {
+        "split-brand": {
+          "layout": "Logo/carré à gauche, copyright à droite",
+          "visualTraits": ["petit carré coloré", "fond semi-transparent", "layout horizontal"],
+          "spacing": "compact, équilibré",
+          "mood": ["moderne", "discret", "professionnel", "clean"]
+        },
+        "centered-simple": {
+          "layout": "Copyright centré avec petite barre colorée",
+          "visualTraits": ["barre verticale colorée", "très minimaliste", "centré"],
+          "spacing": "minimal, très sobre",
+          "mood": ["minimaliste", "épuré", "discret", "sobre", "effacé"]
+        },
+        "centered-decorated": {
+          "layout": "Nom centré avec lignes décoratives, copyright en dessous, bordure colorée",
+          "visualTraits": ["bordure supérieure colorée", "lignes décoratives autour du nom", "typographie serif"],
+          "spacing": "formel, symétrique",
+          "mood": ["élégant", "traditionnel", "raffiné", "établi", "classique"]
+        }
+      }
+    }
+  }
+}
