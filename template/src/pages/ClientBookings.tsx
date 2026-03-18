@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useConfig } from '@/hooks/useConfig';
 import { supabase } from '@/integrations/supabase/client';
-import { AvailableTimePicker } from '@/components/AvailableTimePicker';
+import { TimePickerWeekGrid } from '@/components/blocks/booking/TimePicker/WeekGrid';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -13,16 +13,15 @@ import { parseLocalDateTime, formatLocalDateTime } from '@/utils/dateHelpers';
 const ClientBookings = () => {
   const { signOut, profile } = useAuth();
   const config = useConfig();
-  const [slots, setSlots] = useState<any[]>([]);
+  const [allConfirmedBookings, setAllConfirmedBookings] = useState<any[]>([]);
   const [myBookings, setMyBookings] = useState<any[]>([]);
-  const [allBookings, setAllBookings] = useState<any[]>([]); // Bookings des slots visibles
   const [loading, setLoading] = useState(true);
 
   // Sélection de service
   const [selectedService, setSelectedService] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchSlots();
+    fetchAllConfirmedBookings();
   }, []);
 
   // Fetch bookings only when profile is loaded
@@ -39,25 +38,20 @@ const ClientBookings = () => {
 
     const now = new Date().toISOString();
 
-    // Récupérer tous les bookings confirmés du client qui sont passés
     const { data: pastBookings, error: fetchError } = await supabase
       .from('bookings')
       .select('id, end_time')
       .eq('user_id', profile.id)
       .eq('status', 'confirmed')
-      .lt('end_time', now); // end_time < maintenant
+      .lt('end_time', now);
 
     if (fetchError) {
       console.error('Error fetching past bookings:', fetchError);
       return;
     }
 
-    if (!pastBookings || pastBookings.length === 0) {
-      // Pas de bookings passés à mettre à jour
-      return;
-    }
+    if (!pastBookings || pastBookings.length === 0) return;
 
-    // Mettre à jour tous les bookings passés en "completed"
     const bookingIds = pastBookings.map(b => b.id);
 
     const { error: updateError } = await supabase
@@ -67,46 +61,25 @@ const ClientBookings = () => {
 
     if (updateError) {
       console.error('Error updating past bookings:', updateError);
-    } else {
-      console.log(`${pastBookings.length} past booking(s) marked as completed`);
     }
   };
 
-  const fetchSlots = async () => {
-    const { data, error } = await supabase
-      .from('slots')
-      .select('*')
-      .eq('status', 'active')
-      .gte('start_time', new Date().toISOString())
-      .order('start_time', { ascending: true });
-
-    if (error) {
-      toast.error('Impossible de charger les créneaux');
-      setLoading(false);
-    } else {
-      setSlots(data || []);
-      // Récupérer les bookings pour ces slots et ATTENDRE que ça finisse
-      if (data && data.length > 0) {
-        await fetchBookingsForSlots(data.map(s => s.id));
-      }
-      setLoading(false);
-    }
-  };
-
-  // Récupérer tous les bookings confirmés pour les slots donnés (optimisé)
-  const fetchBookingsForSlots = async (slotIds: string[]) => {
+  // Fetch tous les bookings confirmés futurs du client (pour détecter les conflits)
+  const fetchAllConfirmedBookings = async () => {
     const { data, error } = await supabase
       .from('bookings')
       .select('*')
-      .in('slot_id', slotIds)
       .eq('status', 'confirmed')
-      .eq('client_id', import.meta.env.VITE_CLIENT_ID);
+      .eq('client_id', import.meta.env.VITE_CLIENT_ID)
+      .gte('end_time', new Date().toISOString())
+      .order('start_time', { ascending: true });
 
     if (error) {
-      console.error('Error fetching bookings for slots:', error);
+      toast.error('Impossible de charger les disponibilités');
     } else {
-      setAllBookings(data || []);
+      setAllConfirmedBookings(data || []);
     }
+    setLoading(false);
   };
 
   const fetchMyBookings = async () => {
@@ -114,10 +87,7 @@ const ClientBookings = () => {
 
     const { data, error } = await supabase
       .from('bookings')
-      .select(`
-        *,
-        slot:slots(*)
-      `)
+      .select('*')
       .eq('user_id', profile.id)
       .eq('client_id', import.meta.env.VITE_CLIENT_ID)
       .order('created_at', { ascending: false });
@@ -130,8 +100,7 @@ const ClientBookings = () => {
     }
   };
 
-  // Nouvelle fonction : réserver avec un service et une heure précise
-  const bookSlotWithService = async (slotId: string, startTime: Date) => {
+  const bookSlotWithService = async (startTime: Date) => {
     if (!profile?.id) {
       toast.error('Veuillez vous connecter pour réserver');
       return;
@@ -142,22 +111,20 @@ const ClientBookings = () => {
       return;
     }
 
-    // Récupérer le service sélectionné
     const service = config.services.find(s => s.id === selectedService);
     if (!service) {
       toast.error('Service introuvable');
       return;
     }
 
-    // COUCHE 2 : Vérification de sécurité - empêcher les réservations multiples
+    // Vérification de sécurité - empêcher les réservations multiples
     const futureBooking = myBookings.find(b =>
       b.status === 'confirmed' &&
-      parseLocalDateTime(b.start_time || b.slot?.start_time) > new Date()
+      parseLocalDateTime(b.start_time) > new Date()
     );
 
     if (futureBooking) {
-      const bookingDate = parseLocalDateTime(futureBooking.start_time || futureBooking.slot?.start_time);
-
+      const bookingDate = parseLocalDateTime(futureBooking.start_time);
       toast.error(
         `Vous avez déjà un rendez-vous programmé le ${bookingDate.toLocaleDateString('fr-FR', {
           day: 'numeric',
@@ -170,14 +137,11 @@ const ClientBookings = () => {
       return;
     }
 
-    // Calculer l'heure de fin
     const endTime = new Date(startTime);
     endTime.setMinutes(endTime.getMinutes() + service.duration);
 
-    // Créer la réservation avec tous les détails
     const { error: bookingError } = await supabase.from('bookings').insert({
       client_id: import.meta.env.VITE_CLIENT_ID,
-      slot_id: slotId,
       user_id: profile.id,
       service_id: service.id,
       duration: service.duration,
@@ -195,17 +159,12 @@ const ClientBookings = () => {
       }
     } else {
       toast.success(`${service.name} réservé avec succès pour ${startTime.toLocaleTimeString('fr-FR')} !`);
-      fetchSlots();
+      fetchAllConfirmedBookings();
       fetchMyBookings();
     }
   };
 
   const cancelBooking = async (bookingId: string) => {
-    // Get the booking to find the slot_id
-    const booking = myBookings.find(b => b.id === bookingId);
-    if (!booking) return;
-
-    // Delete booking from database
     const { error: bookingError } = await supabase
       .from('bookings')
       .delete()
@@ -214,20 +173,9 @@ const ClientBookings = () => {
     if (bookingError) {
       toast.error('Impossible d\'annuler la réservation');
     } else {
-      // Update slot availability back to true
-      const { error: slotError } = await supabase
-        .from('slots')
-        .update({ is_available: true })
-        .eq('id', booking.slot_id);
-
-      if (slotError) {
-        toast.error('Impossible de mettre à jour la disponibilité');
-      } else {
-        toast.success('Réservation annulée');
-      }
-
+      toast.success('Réservation annulée');
+      fetchAllConfirmedBookings();
       fetchMyBookings();
-      fetchSlots();
     }
   };
 
@@ -309,29 +257,25 @@ const ClientBookings = () => {
           </CardContent>
         </Card>
 
-        {/* Sélecteur de créneaux - affiché seulement si un service est sélectionné */}
+        {/* Sélecteur de créneaux */}
         {selectedService && (() => {
           const service = config.services.find(s => s.id === selectedService);
           if (!service) return null;
 
-          // Vérifier si le client a déjà un rendez-vous futur confirmé
           const futureBooking = myBookings.find(b =>
             b.status === 'confirmed' &&
-            new Date(b.start_time || b.slot?.start_time) > new Date()
+            new Date(b.start_time) > new Date()
           );
 
           if (futureBooking) {
-            // Bloquer l'affichage et montrer un message explicatif
-            const bookingDate = parseLocalDateTime(futureBooking.start_time || futureBooking.slot?.start_time);
+            const bookingDate = parseLocalDateTime(futureBooking.start_time);
             const bookingService = config.services.find(s => s.id === futureBooking.service_id);
 
             return (
               <Card>
                 <CardHeader>
                   <CardTitle>Réservation non disponible</CardTitle>
-                  <CardDescription>
-                    Vous avez déjà un rendez-vous à venir
-                  </CardDescription>
+                  <CardDescription>Vous avez déjà un rendez-vous à venir</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="bg-muted rounded-lg p-4 sm:p-6 text-center space-y-3">
@@ -366,25 +310,22 @@ const ClientBookings = () => {
             );
           }
 
-          // Si pas de rendez-vous futur, afficher le sélecteur normal
           return (
             <Card>
               <CardHeader>
                 <CardTitle>Créneaux disponibles</CardTitle>
                 <CardDescription>
-                  Sélectionnez un jour, puis choisissez un créneau horaire pour votre {service.name} ({service.duration} min)
+                  Sélectionnez un créneau pour votre {service.name} ({service.duration} min)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <AvailableTimePicker
-                  slots={slots}
-                  bookings={allBookings}
-                  serviceId={service.id}
+                <TimePickerWeekGrid
+                  bookings={allConfirmedBookings}
+                  openingHours={config.openingHours}
                   serviceDuration={service.duration}
-                  granularity={config.bookingSettings.timeSlotGranularity}
-                  onTimeSelect={(slotId, startTime) => {
-                    bookSlotWithService(slotId, startTime);
-                  }}
+                  granularity={config.bookingSettings?.timeSlotGranularity ?? 30}
+                  accentColor={config.theme?.primaryColor || '#0EA5E9'}
+                  onTimeSelect={(startTime) => bookSlotWithService(startTime)}
                 />
               </CardContent>
             </Card>
@@ -404,7 +345,6 @@ const ClientBookings = () => {
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-lg"
                 >
                   <div className="flex-1 min-w-0">
-                    {/* Service name */}
                     {booking.service_id && (() => {
                       const service = config.services.find(s => s.id === booking.service_id);
                       return service ? (
@@ -412,47 +352,25 @@ const ClientBookings = () => {
                       ) : null;
                     })()}
 
-                    {/* Date */}
                     <p className="font-medium text-sm sm:text-base mt-1">
-                      {booking.start_time
-                        ? parseLocalDateTime(booking.start_time).toLocaleDateString('fr-FR', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })
-                        : parseLocalDateTime(booking.slot.start_time).toLocaleDateString('fr-FR', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })
-                      }
+                      {parseLocalDateTime(booking.start_time).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
                     </p>
 
-                    {/* Time */}
                     <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                      {booking.start_time
-                        ? parseLocalDateTime(booking.start_time).toLocaleTimeString('fr-FR', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          })
-                        : parseLocalDateTime(booking.slot.start_time).toLocaleTimeString('fr-FR', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          })
-                      }
+                      {parseLocalDateTime(booking.start_time).toLocaleTimeString('fr-FR', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
                       {' - '}
-                      {booking.end_time
-                        ? parseLocalDateTime(booking.end_time).toLocaleTimeString('fr-FR', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          })
-                        : parseLocalDateTime(booking.slot.end_time).toLocaleTimeString('fr-FR', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          })
-                      }
+                      {parseLocalDateTime(booking.end_time).toLocaleTimeString('fr-FR', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
                       {booking.duration && ` (${booking.duration} min)`}
                     </p>
                   </div>
@@ -463,7 +381,7 @@ const ClientBookings = () => {
                           <CheckCircle2 className="h-3 w-3" />
                           <span className="hidden sm:inline">Confirmé</span>
                         </span>
-                        {config.bookingSettings.allowCancellation && (
+                        {config.bookingSettings?.allowCancellation && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -477,7 +395,7 @@ const ClientBookings = () => {
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-muted text-muted-foreground">
                         <XCircle className="h-3 w-3" />
-                        <span className="hidden sm:inline">Annulé</span>
+                        <span className="hidden sm:inline">{booking.status === 'completed' ? 'Terminé' : 'Annulé'}</span>
                       </span>
                     )}
                   </div>
@@ -490,7 +408,6 @@ const ClientBookings = () => {
           </CardContent>
         </Card>
       </main>
-
     </div>
   );
 };

@@ -7,93 +7,58 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from 'luci
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getAvailableTimeSlotsForService } from '@/utils/availabilityHelpers';
-import { parseLocalDateTime } from '@/utils/dateHelpers';
+import type { Booking } from '@/types';
 
-interface Slot {
-  id: string;
-  start_time: string;
-  end_time: string;
-  is_available: boolean;
-}
-
-interface Booking {
-  id: string;
-  slot_id: string;
-  service_id: string;
-  duration: number;
-  start_time: string;
-  end_time: string;
-  created_at: string;
+interface OpeningHours {
+  [key: string]: string;
 }
 
 interface AvailableTimePickerProps {
-  slots: Slot[];
   bookings: Booking[];
-  serviceId: string;
+  openingHours: OpeningHours;
   serviceDuration: number;
   granularity: number;
-  onTimeSelect: (slotId: string, startTime: Date) => void;
+  onTimeSelect: (startTime: Date) => void;
 }
 
 export const AvailableTimePicker = ({
-  slots,
   bookings,
-  serviceId,
+  openingHours,
   serviceDuration,
   granularity,
   onTimeSelect,
 }: AvailableTimePickerProps) => {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Monday
+  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
-  // Calculer les créneaux disponibles pour un jour donné
-  const getAvailableTimesForDay = (day: Date): { time: Date; slotId: string }[] => {
-    const availableTimes = getAvailableTimeSlotsForService(
-      serviceId,
-      serviceDuration,
-      slots,
-      bookings,
-      granularity
-    );
+  const allAvailableTimes = getAvailableTimeSlotsForService(
+    serviceDuration,
+    bookings,
+    openingHours,
+    granularity
+  );
 
-    // Filtrer pour le jour sélectionné et associer chaque créneau à son slot
-    return availableTimes
-      .filter((time) => {
-        return (
-          time.getDate() === day.getDate() &&
-          time.getMonth() === day.getMonth() &&
-          time.getFullYear() === day.getFullYear()
-        );
-      })
-      .map((time) => {
-        // Trouver le slot qui contient ce créneau
-        const slot = slots.find((s) => {
-          const slotStart = parseLocalDateTime(s.start_time);
-          const slotEnd = parseLocalDateTime(s.end_time);
-          return slotStart <= time && time < slotEnd;
-        });
-        return { time, slotId: slot?.id || '' };
-      })
-      .filter((item) => item.slotId); // Garder seulement ceux avec un slot valide
+  const getAvailableTimesForDay = (day: Date): Date[] => {
+    return allAvailableTimes.filter((time) =>
+      time.getDate() === day.getDate() &&
+      time.getMonth() === day.getMonth() &&
+      time.getFullYear() === day.getFullYear()
+    );
   };
 
-  // Compter les créneaux disponibles par jour
   const getAvailableCountForDay = (day: Date): number => {
-    const times = getAvailableTimesForDay(day);
-    return times.length;
+    return getAvailableTimesForDay(day).length;
   };
 
   const availableTimes = selectedDay ? getAvailableTimesForDay(selectedDay) : [];
 
-  // Grouper les créneaux par période (matin, après-midi, soir)
-  const groupTimesByPeriod = (times: { time: Date; slotId: string }[]) => {
-    const morning = times.filter((t) => t.time.getHours() < 12);
-    const afternoon = times.filter((t) => t.time.getHours() >= 12 && t.time.getHours() < 18);
-    const evening = times.filter((t) => t.time.getHours() >= 18);
-
+  const groupTimesByPeriod = (times: Date[]) => {
+    const morning = times.filter((t) => t.getHours() < 12);
+    const afternoon = times.filter((t) => t.getHours() >= 12 && t.getHours() < 18);
+    const evening = times.filter((t) => t.getHours() >= 18);
     return { morning, afternoon, evening };
   };
 
@@ -127,11 +92,7 @@ export const AvailableTimePicker = ({
               <Calendar
                 mode="single"
                 selected={currentWeek}
-                onSelect={(date) => {
-                  if (date) {
-                    setCurrentWeek(date);
-                  }
-                }}
+                onSelect={(date) => { if (date) setCurrentWeek(date); }}
                 locale={fr}
                 initialFocus
               />
@@ -147,7 +108,7 @@ export const AvailableTimePicker = ({
         </div>
       </div>
 
-      {/* Sélection du jour - scroll horizontal sur mobile */}
+      {/* Sélection du jour */}
       <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
         <div className="grid grid-cols-7 gap-2 min-w-max sm:min-w-0">
           {weekDays.map((day) => {
@@ -166,11 +127,7 @@ export const AvailableTimePicker = ({
                   ${isSelected ? 'ring-2 ring-primary bg-primary/5' : 'hover:shadow-md'}
                   ${isPast || count === 0 ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
-                onClick={() => {
-                  if (!isPast && count > 0) {
-                    setSelectedDay(day);
-                  }
-                }}
+                onClick={() => { if (!isPast && count > 0) setSelectedDay(day); }}
               >
                 <div className="text-[10px] sm:text-xs font-medium text-muted-foreground">
                   {format(day, 'EEE', { locale: fr })}
@@ -188,13 +145,13 @@ export const AvailableTimePicker = ({
         </div>
       </div>
 
-      {/* Créneaux disponibles pour le jour sélectionné */}
+      {/* Créneaux disponibles */}
       {selectedDay && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             <h4 className="text-base sm:text-lg font-semibold">
-              Horaires disponibles pour le {format(selectedDay, 'EEEE d MMMM', { locale: fr })}
+              Horaires du {format(selectedDay, 'EEEE d MMMM', { locale: fr })}
             </h4>
           </div>
 
@@ -204,17 +161,16 @@ export const AvailableTimePicker = ({
             </p>
           ) : (
             <div className="space-y-6">
-              {/* Matin */}
               {groupedTimes.morning.length > 0 && (
                 <div>
                   <h5 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 sm:mb-3">Matin</h5>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {groupedTimes.morning.map(({ time, slotId }) => (
+                    {groupedTimes.morning.map((time) => (
                       <Button
                         key={time.toISOString()}
                         variant="outline"
                         className="h-10 sm:h-12 text-xs sm:text-sm"
-                        onClick={() => onTimeSelect(slotId, time)}
+                        onClick={() => onTimeSelect(time)}
                       >
                         {format(time, 'HH:mm')}
                       </Button>
@@ -223,17 +179,16 @@ export const AvailableTimePicker = ({
                 </div>
               )}
 
-              {/* Après-midi */}
               {groupedTimes.afternoon.length > 0 && (
                 <div>
                   <h5 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 sm:mb-3">Après-midi</h5>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {groupedTimes.afternoon.map(({ time, slotId }) => (
+                    {groupedTimes.afternoon.map((time) => (
                       <Button
                         key={time.toISOString()}
                         variant="outline"
                         className="h-10 sm:h-12 text-xs sm:text-sm"
-                        onClick={() => onTimeSelect(slotId, time)}
+                        onClick={() => onTimeSelect(time)}
                       >
                         {format(time, 'HH:mm')}
                       </Button>
@@ -242,17 +197,16 @@ export const AvailableTimePicker = ({
                 </div>
               )}
 
-              {/* Soir */}
               {groupedTimes.evening.length > 0 && (
                 <div>
                   <h5 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 sm:mb-3">Soir</h5>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {groupedTimes.evening.map(({ time, slotId }) => (
+                    {groupedTimes.evening.map((time) => (
                       <Button
                         key={time.toISOString()}
                         variant="outline"
                         className="h-10 sm:h-12 text-xs sm:text-sm"
-                        onClick={() => onTimeSelect(slotId, time)}
+                        onClick={() => onTimeSelect(time)}
                       >
                         {format(time, 'HH:mm')}
                       </Button>
