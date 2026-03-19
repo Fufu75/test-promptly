@@ -3,6 +3,7 @@ import { buildChatSystemPrompt, buildInitialSystemPrompt } from './systemPrompt'
 import homepageLibrary from '@/config/libraries/homepage.json';
 import authLibrary from '@/config/libraries/auth.json';
 import bookingLibrary from '@/config/libraries/booking.json';
+import homepageConfigDefault from '@/config/pages/homepage-config.json';
 
 // ─── Validation des variants ──────────────────────────────────────────────────
 // Construit une map { blockType → Set<validVariant> } depuis les library JSONs
@@ -96,7 +97,36 @@ export const generateInitialConfigs = async (
   parsed.authBlock = { ...parsed.authBlock, variant: fixVariant('Auth', parsed.authBlock.variant) };
   parsed.bookingBlocks = fixBlockVariants(parsed.bookingBlocks);
 
+  // Filet de sécurité : s'assurer que tous les blocs requis sont présents
+  parsed.homepageBlocks = ensureRequiredBlocks(parsed.homepageBlocks);
+
   return parsed;
+};
+
+// ─── Blocs requis sur la page d'accueil ──────────────────────────────────────
+
+const REQUIRED_BLOCK_TYPES = ['Header', 'Hero', 'Features', 'Services', 'OpeningHours', 'Contact', 'FooterCTA', 'Footer'];
+const DEFAULT_BLOCKS = (homepageConfigDefault as any).pageBlocks as Array<{ type: string; variant: string; props: Record<string, any> }>;
+
+const ensureRequiredBlocks = (
+  blocks: Array<{ type: string; variant: string; props: Record<string, any> }>
+): Array<{ type: string; variant: string; props: Record<string, any> }> => {
+  const present = new Set(blocks.map((b) => b.type));
+  const missing = REQUIRED_BLOCK_TYPES.filter((t) => !present.has(t));
+
+  if (missing.length === 0) return blocks;
+
+  console.warn('[AI] Blocs manquants dans la réponse IA, injection des défauts :', missing);
+
+  // Reconstruire le tableau dans l'ordre canonique
+  const merged = REQUIRED_BLOCK_TYPES.map((type) => {
+    const fromAI = blocks.find((b) => b.type === type);
+    if (fromAI) return fromAI;
+    const fallback = DEFAULT_BLOCKS.find((b) => b.type === type);
+    return fallback!;
+  });
+
+  return merged;
 };
 
 // ─── Modification via chat ────────────────────────────────────────────────────

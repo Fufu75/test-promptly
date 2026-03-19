@@ -66,9 +66,10 @@ Par défaut, tout CTA principal doit avoir la valeur "/auth".`;
 const PAGE_STRUCTURE_RULES = `## Règles de structure des pages
 
 ### Page accueil
-- Doit toujours contenir au minimum : Header + Hero + Footer
-- Ordre logique recommandé : Header → Hero → [Features] → [Services] → [OpeningHours] → [Contact] → [FooterCTA] → Footer
-- Ne jamais supprimer Header, Hero ou Footer
+- Doit TOUJOURS contenir ces 8 blocs dans cet ordre exact, sans exception :
+  Header → Hero → Features → Services → OpeningHours → Contact → FooterCTA → Footer
+- Adapte le CONTENU (textes, couleurs, services) au business — mais ne supprime AUCUN bloc
+- Ne jamais supprimer, réordonner ou omettre un seul de ces 8 blocs
 
 ### Page connexion
 - Contient un seul bloc de type "Auth" — structure fixe
