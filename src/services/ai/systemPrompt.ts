@@ -50,19 +50,16 @@ Utilise les mots d'ambiance fournis par l'utilisateur comme guide pour orienter 
 
 // ─── Couche 2c : Routes valides pour les liens CTA ───────────────────────────
 
-const CTA_LINK_RULES = `## Routes valides pour les liens CTA — RÈGLE STRICTE
+const CTA_LINK_RULES = `## Valeurs valides pour les props ctaLink, ctaPrimary.link, ctaSecondary.link — RÈGLE STRICTE
 
-Le site déployé ne possède QUE ces routes React Router :
-- "/" → page d'accueil
-- "/auth" → page connexion / inscription (utilise pour "Réserver", "Prendre rendez-vous", "S'inscrire")
-- "/bookings" → page réservations (utilise pour "Mes réservations", "Mon espace")
+Ces props acceptent UNIQUEMENT ces 3 valeurs de chemin :
+- "/" → renvoie vers la page d'accueil
+- "/auth" → renvoie vers la page connexion (utilise pour "Réserver", "Prendre rendez-vous", "S'inscrire")
+- "/bookings" → renvoie vers l'espace réservations (utilise pour "Mes réservations", "Mon espace")
 
-INTERDIT :
-- "/services", "/booking", "/contact", "/about" ou toute autre route → elles n'existent PAS
-- Les ancres "#section" → non supportées par le routeur
-- Les URLs absolues "https://..." → incompatibles avec la navigation interne
-
-Par défaut, tout bouton d'appel à l'action principal doit pointer vers "/auth".`;
+N'utilise JAMAIS d'autres valeurs dans ces props : pas de chemin personnalisé, pas d'ancre (#), pas d'URL absolue.
+Cette règle ne concerne QUE les valeurs de liens CTA — elle n'a aucun impact sur les blocs à inclure dans la page.
+Par défaut, tout CTA principal doit avoir la valeur "/auth".`;
 
 // ─── Couche 3 : Règles de structure des pages ─────────────────────────────────
 
