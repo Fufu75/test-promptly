@@ -61,6 +61,29 @@ N'utilise JAMAIS d'autres valeurs dans ces props : pas de chemin personnalisé, 
 Cette règle ne concerne QUE les valeurs de liens CTA — elle n'a aucun impact sur les blocs à inclure dans la page.
 Par défaut, tout CTA principal doit avoir la valeur "/auth".`;
 
+// ─── Couche 2d : Règles strictes globalConfig ────────────────────────────────
+
+const GLOBAL_CONFIG_RULES = `## Règles strictes — globalConfig
+
+### openingHours — OBLIGATOIRE
+- Les 7 jours sont TOUJOURS présents, dans cet ordre exact : monday, tuesday, wednesday, thursday, friday, saturday, sunday
+- Les clés sont TOUJOURS en anglais (jamais lundi, mardi, mercredi, etc.)
+- Format des horaires : "HH:MM-HH:MM" — sans espace autour du tiret, séparateur ":" obligatoire
+  ✓ Correct : "9:00-18:00"
+  ❌ Interdit : "9h - 18h" / "9:00 - 18:00" / "9h-18h" / "09h00-18h00"
+- Jour fermé : exactement "Closed" (C majuscule, jamais "closed", "fermé", "Fermé")
+
+Exemple valide et complet :
+"openingHours": {
+  "monday": "9:00-18:00",
+  "tuesday": "9:00-18:00",
+  "wednesday": "9:00-18:00",
+  "thursday": "9:00-18:00",
+  "friday": "9:00-18:00",
+  "saturday": "Closed",
+  "sunday": "Closed"
+}`;
+
 // ─── Couche 3 : Règles de structure des pages ─────────────────────────────────
 
 const PAGE_STRUCTURE_RULES = `## Règles de structure des pages
@@ -116,7 +139,15 @@ Retourne les 4 clés en JSON valide, sans markdown, sans backticks :
     "businessSector": string,
     "accentColor": "#HEX",
     "services": [{ "id": string, "name": string, "description": string, "duration": number, "price": number, "color": "#HEX", "enabled": true }],
-    "openingHours": { "monday": "HH:MM - HH:MM", ... },
+    "openingHours": {
+      "monday": "9:00-18:00",
+      "tuesday": "9:00-18:00",
+      "wednesday": "9:00-18:00",
+      "thursday": "9:00-18:00",
+      "friday": "9:00-18:00",
+      "saturday": "Closed",
+      "sunday": "Closed"
+    },
     "contact": { "email": string, "phone": string, "address": string }
   },
   "homepageBlocks": [ { "type": "Header", "variant": "<clé exacte depuis componentsLibrary>", "props": {...} }, ... ],
@@ -144,6 +175,7 @@ export const buildChatSystemPrompt = (
     businessSection,
     LIBRARY_AND_CONTRACT,
     CTA_LINK_RULES,
+    GLOBAL_CONFIG_RULES,
     PAGE_STRUCTURE_RULES,
     currentStateSection,
     OUTPUT_FORMAT_CHAT,
@@ -157,6 +189,7 @@ export const buildInitialSystemPrompt = (): string => {
     PERSONA_AND_RULES,
     LIBRARY_AND_CONTRACT,
     CTA_LINK_RULES,
+    GLOBAL_CONFIG_RULES,
     AMBIANCE_GUIDANCE,
     PAGE_STRUCTURE_RULES,
     OUTPUT_FORMAT_INITIAL,
