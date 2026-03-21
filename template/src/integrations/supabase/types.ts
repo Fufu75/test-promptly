@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_admins: {
+        Row: {
+          id: string
+          client_id: string
+          user_id: string
+          role: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          user_id: string
+          role?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          user_id?: string
+          role?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           client_id: string

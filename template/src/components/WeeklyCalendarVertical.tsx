@@ -7,46 +7,17 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useConfig } from '@/hooks/useConfig';
 import { parseLocalDateTime } from '@/utils/dateHelpers';
-
-interface Slot {
-  id: string;
-  start_time: string;
-  end_time: string;
-  is_available: boolean;
-  status?: string;
-}
-
-interface Booking {
-  id: string;
-  slot_id: string;
-  user_id: string;
-  service_id: string;
-  duration: number;
-  start_time: string;
-  end_time: string;
-  status: string;
-  user?: {
-    full_name?: string;
-    email?: string;
-  };
-}
+import type { Booking } from '@/types';
+import { BOOKING_STATUS } from '@/constants';
 
 interface WeeklyCalendarVerticalProps {
-  slots: Slot[];
   bookings: Booking[];
   onBookingClick?: (booking: Booking) => void;
-  onSlotClick?: (slot: Slot) => void;
-  onCreateSlot?: (date: Date, hour: number) => void;
-  isAdmin?: boolean;
 }
 
 export const WeeklyCalendarVertical = ({
-  slots,
   bookings,
   onBookingClick,
-  onSlotClick,
-  onCreateSlot,
-  isAdmin = false,
 }: WeeklyCalendarVerticalProps) => {
   const config = useConfig();
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -91,28 +62,16 @@ export const WeeklyCalendarVertical = ({
     const dayName = dayNames[getDay(date)];
     const hours = config.openingHours[dayName];
 
-    if (hours === 'Closed') return null;
+    if (!hours || hours === 'Closed') return null;
 
     const [start, end] = hours.split('-');
     return {
       start: parseInt(start.split(':')[0]),
-      startMin: parseInt(start.split(':')[1]),
       end: parseInt(end.split(':')[0]),
-      endMin: parseInt(end.split(':')[1]),
     };
   };
 
-  // Trouver TOUS les slots d'une journée
-  const getSlotsForDay = (date: Date) => {
-    return slots.filter(slot => {
-      const slotStart = parseLocalDateTime(slot.start_time);
-      const slotDate = new Date(slotStart.getFullYear(), slotStart.getMonth(), slotStart.getDate());
-      const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      return slotDate.getTime() === targetDate.getTime();
-    });
-  };
-
-  // Trouver tous les bookings pour un jour donné (confirmés ET complétés)
+  // Trouver tous les bookings pour un jour donné
   const getBookingsForDay = (date: Date) => {
     return bookings.filter(booking => {
       if (!booking.start_time) return false;
@@ -120,7 +79,7 @@ export const WeeklyCalendarVertical = ({
       const bookingDate = new Date(bookingStart.getFullYear(), bookingStart.getMonth(), bookingStart.getDate());
       const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       return bookingDate.getTime() === targetDate.getTime() &&
-             (booking.status === 'confirmed' || booking.status === 'completed');
+             (booking.status === BOOKING_STATUS.CONFIRMED || booking.status === BOOKING_STATUS.COMPLETED);
     });
   };
 
@@ -128,20 +87,6 @@ export const WeeklyCalendarVertical = ({
   const getBookingPosition = (booking: Booking) => {
     const startTime = parseLocalDateTime(booking.start_time);
     const endTime = parseLocalDateTime(booking.end_time);
-
-    const startMinutes = (startTime.getHours() - minHour) * 60 + startTime.getMinutes();
-    const endMinutes = (endTime.getHours() - minHour) * 60 + endTime.getMinutes();
-
-    const top = (startMinutes / totalMinutes) * 100;
-    const height = ((endMinutes - startMinutes) / totalMinutes) * 100;
-
-    return { top: `${top}%`, height: `${height}%` };
-  };
-
-  // Calculer la position d'une plage admin
-  const getSlotPosition = (slot: Slot) => {
-    const startTime = parseLocalDateTime(slot.start_time);
-    const endTime = parseLocalDateTime(slot.end_time);
 
     const startMinutes = (startTime.getHours() - minHour) * 60 + startTime.getMinutes();
     const endMinutes = (endTime.getHours() - minHour) * 60 + endTime.getMinutes();
@@ -163,18 +108,10 @@ export const WeeklyCalendarVertical = ({
           {format(weekStart, 'MMM d', { locale: fr })} - {format(addDays(weekStart, 6), 'MMM d, yyyy', { locale: fr })}
         </h2>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}
-          >
+          <Button variant="outline" size="icon" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button
-            variant="outline"
-            className="text-xs sm:text-sm"
-            onClick={() => setCurrentWeek(new Date())}
-          >
+          <Button variant="outline" className="text-xs sm:text-sm" onClick={() => setCurrentWeek(new Date())}>
             Aujourd'hui
           </Button>
           <Popover>
@@ -187,21 +124,13 @@ export const WeeklyCalendarVertical = ({
               <Calendar
                 mode="single"
                 selected={currentWeek}
-                onSelect={(date) => {
-                  if (date) {
-                    setCurrentWeek(date);
-                  }
-                }}
+                onSelect={(date) => { if (date) setCurrentWeek(date); }}
                 locale={fr}
                 initialFocus
               />
             </PopoverContent>
           </Popover>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-          >
+          <Button variant="outline" size="icon" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -212,7 +141,7 @@ export const WeeklyCalendarVertical = ({
         <div className="flex gap-2 md:gap-4 min-w-max md:min-w-0">
           {/* Colonne des heures */}
           <div className="flex flex-col relative flex-shrink-0" style={{ width: '50px', minHeight: '600px' }}>
-            <div className="h-12 md:h-16" /> {/* Espace pour les headers de jours */}
+            <div className="h-12 md:h-16" />
             <div className="relative flex-1">
               {hourLines.map((hour) => (
                 <div
@@ -229,144 +158,91 @@ export const WeeklyCalendarVertical = ({
             </div>
           </div>
 
-          {/* Colonnes des jours - scroll horizontal sur mobile, grid sur desktop */}
+          {/* Colonnes des jours */}
           <div className="flex gap-2 md:gap-3 md:flex-1 md:grid md:grid-cols-7">
-          {weekDays.map((day) => {
-            const daySlots = getSlotsForDay(day);
-            const dayBookings = getBookingsForDay(day);
-            const isClosed = isDayClosed(day);
-            const dayHours = getDayHours(day);
+            {weekDays.map((day) => {
+              const dayBookings = getBookingsForDay(day);
+              const isClosed = isDayClosed(day);
+              const dayHours = getDayHours(day);
 
-            return (
-              <div key={day.toISOString()} className="flex flex-col min-h-[600px] w-[120px] md:w-auto flex-shrink-0 md:flex-shrink">
-                {/* Header du jour */}
-                <div className="text-center pb-2 md:pb-3 mb-2 border-b-2">
-                  <div className="font-semibold text-sm md:text-base">{format(day, 'EEE', { locale: fr })}</div>
-                  <div className="text-xs md:text-sm text-muted-foreground">{format(day, 'd MMM', { locale: fr })}</div>
-                </div>
+              return (
+                <div key={day.toISOString()} className="flex flex-col min-h-[600px] w-[120px] md:w-auto flex-shrink-0 md:flex-shrink">
+                  {/* Header du jour */}
+                  <div className="text-center pb-2 md:pb-3 mb-2 border-b-2">
+                    <div className="font-semibold text-sm md:text-base">{format(day, 'EEE', { locale: fr })}</div>
+                    <div className="text-xs md:text-sm text-muted-foreground">{format(day, 'd MMM', { locale: fr })}</div>
+                  </div>
 
-                {/* Colonne du jour */}
-                <div className="relative flex-1 border-x-2 rounded-md bg-card">
-                  {/* Lignes de grille horizontales */}
-                  {hourLines.map((hour) => (
-                    <div
-                      key={hour}
-                      className="absolute w-full border-t border-muted/30"
-                      style={{
-                        top: `${((hour - minHour) / (maxHour - minHour)) * 100}%`,
-                      }}
-                    />
-                  ))}
+                  {/* Colonne du jour */}
+                  <div className="relative flex-1 border-x-2 rounded-md bg-card">
+                    {/* Lignes de grille */}
+                    {hourLines.map((hour) => (
+                      <div
+                        key={hour}
+                        className="absolute w-full border-t border-muted/30"
+                        style={{ top: `${((hour - minHour) / (maxHour - minHour)) * 100}%` }}
+                      />
+                    ))}
 
-                  {isClosed ? (
-                    // Jour fermé
-                    <div className="absolute inset-0 bg-muted/20 flex items-center justify-center">
-                      <span className="text-sm text-muted-foreground">Fermé</span>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Zone cliquable en arrière-plan pour créer un nouveau slot */}
-                      {isAdmin && dayHours && (
-                        <div
-                          className="absolute w-full bg-muted/10 hover:bg-muted/20 transition-colors cursor-pointer flex items-center justify-center"
-                          style={{
-                            top: `${((dayHours.start - minHour) / (maxHour - minHour)) * 100}%`,
-                            height: `${((dayHours.end - dayHours.start) / (maxHour - minHour)) * 100}%`,
-                          }}
-                          onClick={() => onCreateSlot?.(day, dayHours.start)}
-                        >
-                          {daySlots.length === 0 && (
-                            <span className="text-xs text-muted-foreground">+ Créer une plage</span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Toutes les plages admin (slots) */}
-                      {daySlots.map((slot) => (
-                        <div
-                          key={slot.id}
-                          className={`absolute w-full border-l-4 cursor-pointer transition-all ${
-                            slot.status === 'archived'
-                              ? 'bg-muted/30 border-muted/50 hover:bg-muted/40'
-                              : 'bg-primary/10 border-primary/40 hover:bg-primary/20'
-                          }`}
-                          style={getSlotPosition(slot)}
-                          onClick={(e) => {
-                            e.stopPropagation(); // Empêche de déclencher le onClick du fond
-                            onSlotClick?.(slot);
-                          }}
-                          title={`Plage ${slot.status === 'archived' ? '(Archivée)' : ''}: ${parseLocalDateTime(slot.start_time).toLocaleTimeString()} - ${parseLocalDateTime(slot.end_time).toLocaleTimeString()}`}
-                        />
-                      ))}
-
-                      {/* Bookings */}
-                      {dayBookings.map((booking) => {
-                        const service = config.services.find(s => s.id === booking.service_id);
-                        const color = service?.color || config.theme.primaryColor;
-                        const position = getBookingPosition(booking);
-                        const startTime = parseLocalDateTime(booking.start_time);
-                        const endTime = parseLocalDateTime(booking.end_time);
-                        const durationMinutes = booking.duration || Math.round((endTime.getTime() - startTime.getTime()) / 60000);
-                        const isCompleted = booking.status === 'completed';
-
-                        // Adapter la taille du texte selon la hauteur disponible
-                        const heightPercent = parseFloat(position.height);
-                        const isSmall = heightPercent < 8; // Moins de ~48 minutes
-                        const isTiny = heightPercent < 5; // Moins de ~30 minutes
-
-                        return (
+                    {isClosed ? (
+                      <div className="absolute inset-0 bg-muted/20 flex items-center justify-center">
+                        <span className="text-sm text-muted-foreground">Fermé</span>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Zone d'ouverture */}
+                        {dayHours && (
                           <div
-                            key={booking.id}
-                            className={`absolute inset-x-1 rounded-md shadow-sm cursor-pointer hover:shadow-lg hover:z-10 transition-all overflow-hidden border-2 ${
-                              isCompleted ? 'border-muted/30 opacity-60' : 'border-white/20'
-                            }`}
+                            className="absolute w-full bg-primary/5"
                             style={{
-                              ...position,
-                              backgroundColor: isCompleted ? '#9ca3af' : color,
-                              minHeight: '40px',
+                              top: `${((dayHours.start - minHour) / (maxHour - minHour)) * 100}%`,
+                              height: `${((dayHours.end - dayHours.start) / (maxHour - minHour)) * 100}%`,
                             }}
-                            onClick={() => onBookingClick?.(booking)}
-                          >
-                            <div className={`p-2 text-white h-full flex flex-col ${isTiny ? 'justify-center' : 'justify-start'}`}>
-                              {/* Heure */}
-                              <div className={`font-bold ${isSmall ? 'text-[11px]' : 'text-xs'} leading-tight`}>
-                                {startTime.toLocaleTimeString('en-US', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  hour12: false,
-                                })}
+                          />
+                        )}
+
+                        {/* Bookings */}
+                        {dayBookings.map((booking) => {
+                          const service = config.services.find(s => s.id === booking.service_id);
+                          const color = service?.color || config.theme.primaryColor;
+                          const position = getBookingPosition(booking);
+                          const startTime = parseLocalDateTime(booking.start_time);
+                          const isCompleted = booking.status === BOOKING_STATUS.COMPLETED;
+
+                          return (
+                            <div
+                              key={booking.id}
+                              className={`absolute inset-x-1 rounded-md shadow-sm cursor-pointer hover:shadow-lg hover:z-10 transition-all overflow-hidden border-2 ${
+                                isCompleted ? 'border-muted/30 opacity-60' : 'border-white/20'
+                              }`}
+                              style={{
+                                ...position,
+                                backgroundColor: isCompleted ? '#9ca3af' : color,
+                                minHeight: '36px',
+                              }}
+                              onClick={() => onBookingClick?.(booking)}
+                            >
+                              <div className="px-1.5 py-1 text-white h-full flex flex-col justify-center">
+                                <div className="font-bold text-[11px] leading-tight">
+                                  {startTime.toLocaleTimeString('fr-FR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: false,
+                                  })}
+                                </div>
+                                <div className="font-medium text-[10px] leading-tight truncate opacity-90">
+                                  {booking.user?.full_name || booking.profiles?.full_name || 'Client'}
+                                </div>
                               </div>
-
-                              {/* Client - toujours affiché */}
-                              {!isTiny && (
-                                <div className={`font-semibold ${isSmall ? 'text-[10px]' : 'text-xs'} leading-tight mt-0.5 truncate`}>
-                                  {booking.user?.full_name || booking.user?.email?.split('@')[0] || 'Client'}
-                                </div>
-                              )}
-
-                              {/* Service - seulement si assez de place */}
-                              {!isSmall && service && (
-                                <div className="text-[10px] opacity-90 leading-tight mt-0.5 truncate">
-                                  {service.name}
-                                </div>
-                              )}
-
-                              {/* Durée - seulement si assez de place */}
-                              {!isSmall && (
-                                <div className="text-[9px] opacity-75 leading-tight mt-0.5">
-                                  {durationMinutes}min
-                                </div>
-                              )}
                             </div>
-                          </div>
-                        );
-                      })}
-                    </>
-                  )}
+                          );
+                        })}
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
           </div>
         </div>
       </div>
