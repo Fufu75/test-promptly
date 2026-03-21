@@ -31,6 +31,9 @@ export const Head = () => {
       {config.logoUrl && <meta name="twitter:image" content={config.logoUrl} />}
       {config.social?.twitter && <meta name="twitter:site" content={config.social.twitter} />}
 
+      {/* Favicon — logo du business si disponible, sinon logo Promptly par défaut */}
+      <link rel="icon" type="image/png" href={config.logoUrl || '/favicon-promptly.png'} />
+
       {/* Langue */}
       <html lang="fr" />
     </Helmet>
